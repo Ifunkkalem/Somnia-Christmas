@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Somnia Christmas - Pacman Edition</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Trebuchet MS', sans-serif;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: radial-gradient(circle at top, #0b3d2e, #020b06);
+      color: #fff;
+    }
+
+    /* ❄️ Snow Animation */
+    .snow {
+      position: absolute;
+      top: -10px;
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: snowFall linear infinite;
+    }
+
+    @keyframes snowFall {
+      from { transform: translateY(0); }
+      to { transform: translateY(120vh); }
+    }
+
+    /* 🎄 Center Screen */
+    .screen {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      position: relative;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 42px;
+      color: #00ffae;
+      text-shadow: 0 0 10px red, 0 0 20px green;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 22px;
+      color: #ffffff;
+      margin-bottom: 30px;
+    }
+
+    .menu-box {
+      background: rgba(5, 30, 20, 0.85);
+      border: 2px solid #00ffae;
+      border-radius: 18px;
+      padding: 30px 40px;
+      box-shadow: 0 0 25px green;
+      min-width: 320px;
+    }
+
+    .menu-box input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      margin-bottom: 18px;
+      text-align: center;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .menu-box button {
+      width: 100%;
+      padding: 14px;
+      margin: 8px 0;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      background: linear-gradient(90deg, #ff0000, #00ff7f);
+      color: white;
+      transition: 0.2s;
+    }
+
+    .menu-box button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px red;
+    }
+
+    /* 🔄 Hidden Screens */
+    .hidden {
+      display: none !important;
+    }
+
+    /* GAME & LEADERBOARD FRAME */
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: black;
+    }
+
+    /* 🔙 BACK BUTTON */
+    .back-btn {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      z-index: 9999;
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      background: linear-gradient(90deg, red, green);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ❄️ SNOW EFFECT -->
+<script>
+  for (let i = 0; i < 35; i++) {
+    const snow = document.createElement("div");
+    snow.className = "snow";
+    snow.style.left = Math.random() * 100 + "vw";
+    snow.style.animationDuration = (Math.random() * 5 + 5) + "s";
+    snow.style.opacity = Math.random();
+    document.body.appendChild(snow);
+  }
+</script>
+
+<!-- 🎄 MAIN MENU -->
+<div id="menuScreen" class="screen">
+  <h1>☃️ SOMNIA CHRISTMAS CARNIVAL</h1>
+  <h2>PAC-MAN EDITION 🎄</h2>
+
+  <div class="menu-box">
+    <input 
+      id="displayNameInput" 
+      type="text" 
+      maxlength="12" 
+      placeholder="Enter Display Name (Max 12)"
+    />
+
+    <button onclick="saveName()">SAVE DISPLAY NAME</button>
+    <button onclick="openPlay()">PLAY</button>
+    <button onclick="openLeaderboard()">LEADERBOARD</button>
+    <button onclick="quitGame()">QUIT</button>
+  </div>
+</div>
+
+<!-- 🎮 PLAY SCREEN -->
+<div id="playScreen" class="screen hidden">
+  <button class="back-btn" onclick="goBack()">⬅ BACK</button>
+  <iframe id="gameFrame" src="pacman.html"></iframe>
+</div>
+
+<!-- 🏆 LEADERBOARD SCREEN -->
+<div id="leaderboardScreen" class="screen hidden">
+  <button class="back-btn" onclick="goBack()">⬅ BACK</button>
+  <iframe id="leaderFrame" src="leaderboard.html"></iframe>
+</div>
+
+<script>
+  const nameInput = document.getElementById("displayNameInput");
+  const savedName = localStorage.getItem("displayName");
+
+  if (savedName) nameInput.value = savedName;
+
+  function saveName() {
+    let name = nameInput.value.trim();
+    if (name.length === 0) {
+      alert("Nama tidak boleh kosong!");
+      return;
+    }
+    if (name.length > 12) {
+      alert("Max 12 karakter!");
+      return;
+    }
+    localStorage.setItem("displayName", name);
+    alert("Display Name disimpan!");
+  }
+
+  function openPlay() {
+    document.getElementById("menuScreen").classList.add("hidden");
+    document.getElementById("leaderboardScreen").classList.add("hidden");
+    document.getElementById("playScreen").classList.remove("hidden");
+
+    // paksa reload game setiap klik play
+    document.getElementById("gameFrame").src = "pacman.html?" + Date.now();
+  }
+
+  function openLeaderboard() {
+    document.getElementById("menuScreen").classList.add("hidden");
+    document.getElementById("playScreen").classList.add("hidden");
+    document.getElementById("leaderboardScreen").classList.remove("hidden");
+
+    // reload leaderboard
+    document.getElementById("leaderFrame").src = "leaderboard.html?" + Date.now();
+  }
+
+  function goBack() {
+    document.getElementById("playScreen").classList.add("hidden");
+    document.getElementById("leaderboardScreen").classList.add("hidden");
+    document.getElementById("menuScreen").classList.remove("hidden");
+  }
+
+  function quitGame() {
+    window.open("about:blank", "_self");
+    window.close();
+  }
+</script>
+
+</body>
+</html>
