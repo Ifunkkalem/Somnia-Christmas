@@ -167,10 +167,60 @@
 
     // START GAME: safer flow to avoid unpredictable gas where possible
     async startGame() {
-      if (!this.contract || !this.signer) {
-        alert("Contract leaderboard tidak siap atau wallet belum benar-benar connect.");
-        return { success: false, error: "contract_not_ready" };
-      }
+  if (!this.contract || !this.signer) {
+    alert("Wallet belum siap.");
+    return;
+  }
+
+  try {
+    const net = await this.provider.getNetwork();
+    const hex = "0x" + net.chainId.toString(16);
+
+    if (hex.toLowerCase() !== window.SOMNIA_CHAIN.chainId.toLowerCase()) {
+      alert("Harap pindah ke Somnia Mainnet!");
+      return;
+    }
+
+    // =========================
+    // AMBIL FEE ASLI DARI CHAIN
+    // =========================
+    let fee = await this.contract.startFeeWei();
+
+    // =========================
+    // AMBIL SALDO
+    // =========================
+    const bal = await this.provider.getBalance(this.address);
+    if (bal.lt(fee)) {
+      alert("Saldo SOMI tidak cukup.");
+      return;
+    }
+
+    // =========================
+    // GAS FIX HARD
+    // =========================
+    const gasPrice = await this.provider.getGasPrice();
+
+    const tx = await this.contract.startGame({
+      value: fee,
+      gasLimit: 350000,   // HARD LIMIT ✅
+      gasPrice            // HARD GASPRICE ✅
+    });
+
+    console.log("TX sent:", tx.hash);
+    document.getElementById("activityLog").textContent = "TX sent..." ;
+
+    await tx.wait(1);
+
+    document.getElementById("activityLog").textContent = "Game started!";
+    await this.refreshBalances();
+
+    return tx.hash;
+
+  } catch (e) {
+    console.error("startGame failed:", e);
+    alert("TX gagal dikirim. RPC sedang error, coba ulang.");
+  }
+    }
 
       try {
         // 1) baca fee on-chain (function name: startFeeWei)
