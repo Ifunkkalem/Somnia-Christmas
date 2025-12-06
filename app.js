@@ -157,10 +157,53 @@ btnSaveName.onclick = () => {
 
 /* ========== PLAY FLOW ========== */
 btnPlay.onclick = async () => {
-  if (!provider || !signer || !userAddress) {
-    alert("Sambungkan wallet dulu (Connect Wallet).");
+  if (!DreamWeb3.contract || !DreamWeb3.signer || !DreamWeb3.address) {
+    alert("Wallet belum terkoneksi dengan benar.");
     return;
   }
+
+  const name = (displayNameInput.value || "").trim();
+  if (!name) {
+    alert("Isi Display Name terlebih dahulu (Max 12).");
+    return;
+  }
+
+  localStorage.setItem(`displayName_${DreamWeb3.address}`, name);
+
+  try {
+    btnPlay.disabled = true;
+    btnPlay.innerText = "Processing...";
+    logAct("Memanggil startGame() on-chain...");
+
+    // ✅ PANGGIL FUNGSI ON-CHAIN YANG BENAR
+    const result = await DreamWeb3.startGame();
+
+    if (!result.success) {
+      throw new Error(result.message || "TX failed");
+    }
+
+    logAct("TX SUCCESS: " + result.txHash);
+
+    await DreamWeb3.refreshBalances();
+
+    // ✅ MASUKKAN KE GAME
+    openPlayScreen();
+
+    // ✅ KIRIM SIGNAL KE IFRAME
+    const payload = { type: "START_GAME_RESULT", success: true, txHash: result.txHash };
+    try {
+      gameFrame.contentWindow.postMessage(payload, "*");
+    } catch (e) {}
+
+  } catch (err) {
+    console.error("PLAY ERROR:", err);
+    alert("Start Game gagal: " + (err.message || err));
+    logAct("Start game gagal");
+  } finally {
+    btnPlay.disabled = false;
+    btnPlay.innerText = "PLAY (0.01 SOMI)";
+  }
+};
 
   // confirm display name exists
   const name = (displayNameInput.value || "").trim();
