@@ -14,7 +14,7 @@ body{width:100vw;height:100vh;overflow:hidden;background:linear-gradient(to righ
 #title{font-size:32px;color:#00ffae;text-shadow:0 0 10px red,0 0 20px green;margin-top:20px;text-align:center;}
 #walletDisplay,#walletBalance{font-size:14px;margin-top:5px;}
 button{padding:10px;border:none;border-radius:8px;background:linear-gradient(90deg,red,green);color:white;cursor:pointer;}
-#gameFrame,#leaderboardFrame{flex:1;width:100%;border:none;margin-top:10px;}
+iframe{flex:1;width:100%;border:none;margin-top:10px;display:none;}
 footer{position:absolute;bottom:5px;color:#0ff;text-shadow:0 0 5px #0ff;font-size:14px;text-align:center;width:100%;}
 .snow{position:absolute;top:-10px;width:8px;height:8px;background:white;border-radius:50%;opacity:0.8;animation:snowFall linear infinite;}
 @keyframes snowFall{from{transform:translateY(0);}to{transform:translateY(120vh);}}
@@ -32,11 +32,11 @@ footer{position:absolute;bottom:5px;color:#0ff;text-shadow:0 0 5px #0ff;font-siz
     <button id="leaderboardBtn">Leaderboard</button>
   </div>
 
-  <!-- Main kanan -->
+  <!-- Main Kanan -->
   <div id="main">
     <div id="title">☃️ SOMNIA CHRISTMAS CARNIVAL 🎄</div>
-    <iframe id="gameFrame" src="" class="hidden"></iframe>
-    <iframe id="leaderboardFrame" src="" class="hidden"></iframe>
+    <iframe id="gameFrame" src=""></iframe>
+    <iframe id="leaderboardFrame" src=""></iframe>
     <footer>Created by: @ifunkkalem | @ifunkkalem91</footer>
   </div>
 
@@ -56,54 +56,58 @@ for(let i=0;i<35;i++){
 
 <script>
 let walletAddress=null;
+let provider, signer;
+const somiContractAddress="0xYourSomiContractAddressHere"; // Ganti contract $SOMI
+const leaderboardContractAddress="0xYourLeaderboardContractHere"; // Ganti contract leaderboard
+const abi=[ "function balanceOf(address owner) view returns (uint256)", "function transfer(address to,uint256 amount) returns (bool)" ];
 
-// Wallet Connect
 const connectBtn=document.getElementById("connectWalletBtn");
 const walletDisplay=document.getElementById("walletDisplay");
 const balanceDisplay=document.getElementById("walletBalance");
+const playBtn=document.getElementById("playBtn");
+const gameFrame=document.getElementById("gameFrame");
+const leaderboardBtn=document.getElementById("leaderboardBtn");
+const leaderboardFrame=document.getElementById("leaderboardFrame");
+
+// Connect wallet
 connectBtn.addEventListener("click",async()=>{
-  if(!window.ethereum){alert("Please install MetaMask or compatible wallet!");return;}
+  if(!window.ethereum){alert("Please install MetaMask or EVM wallet!"); return;}
   try{
-    const accounts=await window.ethereum.request({method:"eth_requestAccounts"});
-    walletAddress=accounts[0];
+    provider=new ethers.BrowserProvider(window.ethereum);
+    await provider.send("eth_requestAccounts",[]);
+    signer=await provider.getSigner();
+    walletAddress=await signer.getAddress();
     walletDisplay.innerText=walletAddress;
-    const provider=new ethers.JsonRpcProvider("https://rpc.somniamainnet.io");
-    const somiContractAddress="0xYourSomiContractAddressHere"; // ganti contract SOMI
-    const abi=["function balanceOf(address owner) view returns (uint256)"];
+
     const contract=new ethers.Contract(somiContractAddress,abi,provider);
     const balance=await contract.balanceOf(walletAddress);
     balanceDisplay.innerText=ethers.formatUnits(balance,18)+" $SOMI";
-    alert("Wallet connected!");
+    alert("Wallet connected and balance loaded!");
   }catch(err){console.error(err);alert("Failed to connect wallet!");}
 });
 
-// Play Game
-const playBtn=document.getElementById("playBtn");
-const gameFrame=document.getElementById("gameFrame");
-playBtn.addEventListener("click",()=>{
-  if(!walletAddress){alert("Please connect wallet first!"); return;}
-  // trigger pay 0.01 SOMI to contract
-  window.postMessage({type:"payRequest",to:"0xYourLeaderboardContractHere",from:walletAddress,amount:"0.01"},"*");
-});
+// Pay to Play
+playBtn.addEventListener("click",async()=>{
+  if(!walletAddress){alert("Connect wallet first!");return;}
+  try{
+    const contract=new ethers.Contract(somiContractAddress,abi,signer);
+    const tx=await contract.transfer(leaderboardContractAddress,ethers.parseUnits("0.01",18));
+    await tx.wait();
+    alert("Payment successful! Game will start.");
 
-// Receive pay success
-window.addEventListener("message",e=>{
-  if(e.data.type==="paySuccess"){
+    // Load game
     gameFrame.src="Pacman/pacman_natal.html";
-    gameFrame.classList.remove("hidden");
-    document.getElementById("leaderboardFrame").classList.add("hidden");
-  }
+    gameFrame.style.display="block";
+    leaderboardFrame.style.display="none";
+  }catch(err){console.error(err);alert("Payment failed!");}
 });
 
 // Leaderboard
-const leaderboardBtn=document.getElementById("leaderboardBtn");
-const leaderboardFrame=document.getElementById("leaderboardFrame");
 leaderboardBtn.addEventListener("click",()=>{
   leaderboardFrame.src="leaderboard.html";
-  leaderboardFrame.classList.remove("hidden");
-  gameFrame.classList.add("hidden");
+  leaderboardFrame.style.display="block";
+  gameFrame.style.display="none";
 });
 </script>
-
 </body>
 </html>
