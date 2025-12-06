@@ -99,21 +99,56 @@ btnSaveName.onclick = ()=>{
 };
 
 // ================= PLAY GAME =================
-btnPlay.onclick = async ()=>{
-  if (!signer || !userAddress){
-    alert("Connect wallet dulu");
+btnPlay.onclick = async () => {
+  if (!provider || !signer || !userAddress) {
+    alert("Connect wallet dulu.");
     return;
   }
 
   try {
-    log("Processing TX 0.01 SOMI...");
+    btnPlay.disabled = true;
+    btnPlay.innerText = "Processing...";
 
-    const tx = await signer.sendTransaction({
-      to: CONTRACT_LEADERBOARD,
-      value: ethers.utils.parseEther(START_FEE)
+    const contract = new ethers.Contract(
+      CONTRACT_LEADERBOARD,
+      window.ABI.LEADERBOARD,
+      signer
+    );
+
+    // ✅ AMBIL STARTFEE LANGSUNG DARI CHAIN
+    const startFee = await contract.startFeeWei();
+    console.log("START FEE ONCHAIN:", startFee.toString());
+
+    const bal = await provider.getBalance(userAddress);
+    if (bal.lt(startFee)) {
+      alert("Saldo SOMI tidak cukup.");
+      btnPlay.disabled = false;
+      btnPlay.innerText = "PLAY (0.01 SOMI)";
+      return;
+    }
+
+    // ✅ HARD GAS BYPASS ESTIMATE
+    const tx = await contract.startGame({
+      value: startFee,
+      gasLimit: 350000
     });
 
+    logAct("TX sent: " + tx.hash);
+
     await tx.wait(1);
+
+    logAct("Game started!");
+    await refreshBalance();
+    openPlayScreen();
+
+  } catch (err) {
+    console.error("START GAME ERROR:", err);
+    alert("TX gagal: kemungkinan fee tidak cocok / cooldown aktif.");
+  } finally {
+    btnPlay.disabled = false;
+    btnPlay.innerText = "PLAY (0.01 SOMI)";
+  }
+};
 
     // ✅ UPDATE SALDO SETELAH TX
     const bal = await provider.getBalance(userAddress);
