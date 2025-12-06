@@ -1,3 +1,4 @@
+console.log("✅ web3.js terload");
 (async () => {
   if (!window.ethereum) {
     alert("MetaMask tidak terdeteksi.");
