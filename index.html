@@ -4,41 +4,157 @@
   <meta charset="utf-8" />
   <title>Somnia Christmas — Pacman Edition</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="style.css" />
+
   <style>
-    /* minimal inline styling to ensure menu looks correct */
-    body{margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#05233a,#0a0812);color:#fff;height:100vh;overflow:hidden}
-    .screen{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
-    .menu{background:rgba(255,255,255,0.03);border:2px solid #ffb347;padding:28px;border-radius:14px;min-width:320px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
-    h1{color:#fff;margin-bottom:6px;text-shadow:0 0 12px #ffb347}
-    h2{color:#ffd9ff;margin-bottom:14px}
-    .menu input{width:100%;padding:10px;border-radius:8px;border:none;margin-bottom:12px;text-align:center}
-    .menu button{width:100%;padding:10px;margin:8px 0;border-radius:10px;border:none;cursor:pointer;font-weight:700;background:linear-gradient(90deg,#ffb347,#b06ab3);color:#111}
-    .small{padding:8px;font-size:14px}
-    .topbar{position:fixed;left:16px;top:12px;color:#fff;display:flex;gap:12px;align-items:center}
-    #addrDisplay{font-size:13px;opacity:0.9}
-    .badge{background:#fff1; padding:6px 8px;border-radius:8px;font-weight:600}
-    /* full frame iframe container */
-    #playContainer{width:100%;height:100%;display:flex;flex-direction:column}
-    #iframeWrap{flex:1;background:#000;display:flex;align-items:center;justify-content:center}
-    #gameFrame{width:100%;height:100%;border:none;background:#000}
-    .controlsRow{display:flex;gap:8px;padding:10px;background:linear-gradient(90deg,#121212,#0b1b2a);align-items:center}
-    .muted{opacity:0.85;color:#ddd}
-    .activity{position:fixed;right:12px;top:12px;background:#0006;padding:8px;border-radius:8px;font-size:13px}
+    body {
+      margin: 0;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background: radial-gradient(circle at top, #0b3b5a, #0a0812);
+      color: #fff;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu {
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid #ffd27f;
+      padding: 28px;
+      border-radius: 14px;
+      min-width: 320px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    h1 {
+      color: #fff;
+      margin-bottom: 6px;
+      text-shadow: 0 0 12px #ffd27f;
+    }
+
+    h2 {
+      color: #e5c9ff;
+      margin-bottom: 14px;
+    }
+
+    .menu input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 12px;
+      text-align: center;
+      outline: none;
+    }
+
+    .menu button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      background: linear-gradient(90deg, #ffd27f, #c77dff);
+      color: #111;
+    }
+
+    .small {
+      padding: 8px;
+      font-size: 14px;
+    }
+
+    .topbar {
+      position: fixed;
+      left: 16px;
+      top: 12px;
+      color: #fff;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      z-index: 99;
+    }
+
+    .badge {
+      background: #ffffff22;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-weight: 700;
+    }
+
+    #addrDisplay {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    #playContainer {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .controlsRow {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      background: linear-gradient(90deg, #121212, #0b1b2a);
+      align-items: center;
+    }
+
+    #iframeWrap {
+      flex: 1;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #gameFrame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #000;
+    }
+
+    .muted {
+      opacity: 0.85;
+      color: #ddd;
+      font-size: 13px;
+    }
+
+    .activity {
+      position: fixed;
+      right: 12px;
+      top: 12px;
+      background: #0008;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      z-index: 99;
+    }
   </style>
 </head>
 <body>
 
+  <!-- ✅ TOP BAR -->
   <div class="topbar">
     <div class="badge">Somnia Mainnet</div>
-    <div id="addrDisplay" style="margin-left:8px">Not connected</div>
-    <button id="btnConnect" style="margin-left:12px;padding:6px 8px;border-radius:8px">Connect Wallet</button>
+    <div id="addrDisplay">Not connected</div>
+    <button id="btnConnect">Connect Wallet</button>
   </div>
 
-  <!-- MAIN MENU -->
+  <!-- ✅ MAIN MENU -->
   <div id="menuScreen" class="screen">
-    <div class="menu" role="main" aria-labelledby="title">
-      <h1 id="title">WELCOME SOMNIA</h1>
+    <div class="menu">
+      <h1>WELCOME SOMNIA</h1>
       <h2>PACMAN — Christmas Edition</h2>
 
       <input id="displayNameInput" maxlength="12" placeholder="Display name (max 12)" />
@@ -50,12 +166,12 @@
 
       <div style="margin-top:12px;text-align:left;color:#eee;font-size:13px">
         <div>Balance: <span id="balanceSomi">-</span> SOMI</div>
-        <div style="margin-top:6px" class="muted">Note: Play requires 0.01 SOMI (on-chain)</div>
+        <div style="margin-top:6px" class="muted">Note: Play requires 0.01 SOMI on-chain</div>
       </div>
     </div>
   </div>
 
-  <!-- PLAY SCREEN (iframe container) -->
+  <!-- ✅ PLAY SCREEN -->
   <div id="playScreen" class="screen" style="display:none;flex-direction:column">
     <div class="controlsRow">
       <button id="btnBackFromPlay" class="small">← BACK</button>
@@ -66,14 +182,13 @@
     </div>
 
     <div id="iframeWrap">
-      <!-- Pastikan file pacman_hybrid.html berada di folder Pacman/ atau path sesuai -->
       <iframe id="gameFrame" src="Pacman/pacman_hybrid.html"></iframe>
     </div>
   </div>
 
-  <!-- LEADERBOARD SCREEN -->
+  <!-- ✅ LEADERBOARD SCREEN -->
   <div id="leaderboardScreen" class="screen" style="display:none;flex-direction:column;align-items:center">
-    <div style="width:720px;max-width:95%;background:rgba(255,255,255,0.03);padding:18px;border-radius:12px">
+    <div style="width:720px;max-width:95%;background:rgba(255,255,255,0.05);padding:18px;border-radius:12px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
         <button id="btnBackFromLb" class="small">← BACK</button>
         <h3 style="margin:0">Leaderboard (Top 10)</h3>
@@ -82,11 +197,17 @@
     </div>
   </div>
 
+  <!-- ✅ ACTIVITY LOG -->
   <div class="activity" id="activityLog">Ready</div>
 
-  <!-- libs: ethers (lokal) -->
+  <!-- ✅ ETHERS -->
   <script src="libs/ethers.min.js"></script>
-  <!-- main app logic -->
+
+  <!-- ✅ CONFIG -->
+  <script src="config.js"></script>
+
+  <!-- ✅ APP -->
   <script src="app.js"></script>
+
 </body>
 </html>
