@@ -4,59 +4,51 @@
 <meta charset="UTF-8">
 <title>Pacman Christmas</title>
 <style>
-body, html { margin:0; padding:0; background:#020b06; }
-#gameContainer{position:relative;width:800px;height:600px;margin:auto;border:8px solid red;border-radius:15px;box-shadow:0 0 30px green;animation:borderBlink 2s infinite; overflow:hidden;}
-@keyframes borderBlink {0%{box-shadow:0 0 30px red;border-color:red;}50%{box-shadow:0 0 30px yellow;border-color:yellow;}100%{box-shadow:0 0 30px green;border-color:green;}}
+body,html{margin:0;padding:0;background:#020b06;}
+#gameContainer{position:relative;width:800px;height:600px;margin:auto;border:8px solid red;border-radius:15px;box-shadow:0 0 30px green;overflow:hidden;}
 canvas{background:#111; display:block; margin:0 auto;}
-#finishBtn{position:absolute; bottom:10px; left:50%; transform:translateX(-50%); padding:10px 20px; font-size:16px; font-weight:bold; border:none; border-radius:10px; background:linear-gradient(90deg, red, green); color:white; cursor:pointer; z-index:1000;}
+#finishBtn{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);padding:10px 20px;font-size:16px;font-weight:bold;border:none;border-radius:10px;background:linear-gradient(90deg,red,green);color:white;cursor:pointer;z-index:1000;}
 </style>
 </head>
 <body>
 <div id="gameContainer">
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
-  <button id="finishBtn">FINISH GAME 🎄</button>
+<canvas id="gameCanvas" width="800" height="600"></canvas>
+<button id="finishBtn">FINISH GAME 🎄</button>
 </div>
 
 <script src="libs/ethers.min.js"></script>
 <script>
-// dummy Pacman game setup
-const canvas=document.getElementById("gameCanvas"); const ctx=canvas.getContext("2d");
+const canvas=document.getElementById("gameCanvas"),ctx=canvas.getContext("2d");
 let score=0;
-let pacman={x:1,y:1,dirX:0,dirY:0}; 
+let pacman={x:1,y:1,dirX:0,dirY:0};
 let map=["################","#..............#","#.####.####.#..#","#..............#","#.####.#.####..#","#..............#","################"];
-let dots=[]; for(let y=0;y<map.length;y++){ for(let x=0;x<map[y].length;x++){ if(map[y][x]===".") dots.push({x,y,color:["yellow","red","green"][Math.floor(Math.random()*3)]}); }}
+let dots=[];for(let y=0;y<map.length;y++){for(let x=0;x<map[y].length;x++){if(map[y][x]===".")dots.push({x,y,color:["yellow","red","green"][Math.floor(Math.random()*3)]});}}
 
 // draw functions
 function drawMaze(){for(let y=0;y<map.length;y++){for(let x=0;x<map[y].length;x++){if(map[y][x]==="#"){ctx.fillStyle="green";ctx.fillRect(x*40,y*40,40,40);}}}}
 function drawDots(){dots.forEach(dot=>{ctx.fillStyle=dot.color;ctx.beginPath();ctx.arc(dot.x*40+20,dot.y*40+20,6,0,Math.PI*2);ctx.fill();});}
-function drawPacman(){ctx.fillStyle="yellow";ctx.beginPath();ctx.arc(pacman.x*40+20,pacman.y*40+20,18,0.25*Math.PI,1.75*Math.PI);ctx.lineTo(pacman.x*40+20,pacman.y*40+20);ctx.fill(); ctx.fillStyle="red"; ctx.beginPath(); ctx.moveTo(pacman.x*40+5,pacman.y*40-20); ctx.lineTo(pacman.x*40+35,pacman.y*40-20); ctx.lineTo(pacman.x*40+20,pacman.y*40-40); ctx.closePath(); ctx.fill(); ctx.fillStyle="white"; ctx.beginPath(); ctx.arc(pacman.x*40+20,pacman.y*40-40,5,0,Math.PI*2); ctx.fill(); }
-function drawScore(){ ctx.fillStyle="white"; ctx.font="20px Arial"; ctx.fillText("Score: "+score,10,20); }
+function drawPacman(){ctx.fillStyle="yellow";ctx.beginPath();ctx.arc(pacman.x*40+20,pacman.y*40+20,18,0.25*Math.PI,1.75*Math.PI);ctx.lineTo(pacman.x*40+20,pacman.y*40+20);ctx.fill();}
+function drawScore(){ctx.fillStyle="white";ctx.font="20px Arial";ctx.fillText("Score: "+score,10,20);}
 
-function gameLoop(){ ctx.clearRect(0,0,canvas.width,canvas.height); drawMaze(); drawDots(); drawPacman(); drawScore(); }
+function gameLoop(){ctx.clearRect(0,0,canvas.width,canvas.height);drawMaze();drawDots();drawPacman();drawScore();}
+document.addEventListener("keydown",e=>{if(e.key==="ArrowUp"){pacman.dirX=0;pacman.dirY=-1;}if(e.key==="ArrowDown"){pacman.dirX=0;pacman.dirY=1;}if(e.key==="ArrowLeft"){pacman.dirX=-1;pacman.dirY=0;}if(e.key==="ArrowRight"){pacman.dirX=1;pacman.dirY=0;}});
 
-// controls
-document.addEventListener("keydown", e=>{ if(e.key==="ArrowUp"){ pacman.dirX=0; pacman.dirY=-1; } if(e.key==="ArrowDown"){ pacman.dirX=0; pacman.dirY=1; } if(e.key==="ArrowLeft"){ pacman.dirX=-1; pacman.dirY=0; } if(e.key==="ArrowRight"){ pacman.dirX=1; pacman.dirY=0; } });
+function updatePacman(){let nextX=pacman.x+pacman.dirX,nextY=pacman.y+pacman.dirY;if(map[nextY][nextX]!=="#"){pacman.x=nextX;pacman.y=nextY;}dots=dots.filter(dot=>{if(dot.x===pacman.x&&dot.y===pacman.y){score+=10;return false;}return true;});}
+let interval=setInterval(()=>{updatePacman();gameLoop();},100);
 
-// update pacman & eat dots
-function updatePacman(){ let nextX=pacman.x+pacman.dirX; let nextY=pacman.y+pacman.dirY; if(map[nextY][nextX]!=="#"){ pacman.x=nextX; pacman.y=nextY; } dots=dots.filter(dot=>{ if(dot.x===pacman.x && dot.y===pacman.y){ score+=10; return false; } return true; }); }
-
-let interval=setInterval(()=>{updatePacman(); gameLoop();},1000/10);
-
-// --- Smart Contract submit ---
 const contractAddress="0xYourContractAddress";
 const abi=["function submitScore(address player,uint256 score) external"];
-async function submitScore(){ 
-  if(!window.parent.walletAddress){ alert("Connect wallet first!"); return; }
-  const provider=new ethers.BrowserProvider(window.ethereum);
+async function submitScore(){
+  if(!window.parent.walletAddress){alert("Connect wallet first!");return;}
+  const provider=new ethers.providers.Web3Provider(window.ethereum);
   const signer=provider.getSigner();
-  const contract=new ethers.Contract(contractAddress, abi, signer);
-  try{ const tx=await contract.submitScore(window.parent.walletAddress, score); await tx.wait(); alert("Score submitted: "+score); } 
-  catch(err){ console.error(err); alert("Submit failed!"); }
+  const contract=new ethers.Contract(contractAddress,abi,signer);
+  try{const tx=await contract.submitScore(window.parent.walletAddress,score);await tx.wait();alert("Score submitted: "+score);}catch(err){console.error(err);alert("Submit failed!");}
 }
 
 document.getElementById("finishBtn").addEventListener("click",()=>{
   clearInterval(interval);
-  submitScore().then(()=>{ window.parent.goBack(); });
+  submitScore().then(()=>{window.parent.goBack();});
 });
 </script>
 </body>
