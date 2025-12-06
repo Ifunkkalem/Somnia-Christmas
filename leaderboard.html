@@ -3,27 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <title>Leaderboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+body{margin:0;padding:0;background:#111;color:white;font-family:'Trebuchet MS',sans-serif;text-align:center;}
+h2{color:#00ffae;text-shadow:0 0 5px #00ffae;}
+table{margin:20px auto;border-collapse:collapse;width:70%;}
+th,td{padding:10px;border:1px solid #00ffae;}
+th{background:#222;color:#00ffae;}
+</style>
 </head>
 <body>
-<h2>LEADERBOARD</h2>
-<ul id="leaderList"></ul>
-<script src="libs/ethers.min.js"></script>
+<h2>Somnia Christmas Pac-Man Leaderboard</h2>
+<table>
+  <thead>
+    <tr><th>Rank</th><th>Wallet</th><th>Score</th></tr>
+  </thead>
+  <tbody id="leaderBody"></tbody>
+</table>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <script>
-const contractAddress="0xYourContractAddress";
-const abi=["function getLeaderboard() view returns(address[] memory,uint256[] memory)"];
+const leaderboardContractAddress = "0xYourLeaderboardContractHere";
+const leaderboardAbi = ["function getTopScores() view returns (address[] wallets,uint256[] scores)"];
+
 async function loadLeaderboard(){
-  if(!window.ethereum){ alert("No wallet provider found"); return; }
-  const provider=new ethers.BrowserProvider(window.ethereum);
-  const contract=new ethers.Contract(contractAddress, abi, provider);
-  const [addresses,scores]=await contract.getLeaderboard();
-  const ul=document.getElementById("leaderList"); ul.innerHTML="";
-  for(let i=0;i<addresses.length;i++){
-    const li=document.createElement("li");
-    li.textContent=addresses[i]+" - "+scores[i];
-    ul.appendChild(li);
-  }
+  if(!window.ethereum){console.log("Wallet not detected"); return;}
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const leaderboard = new ethers.Contract(leaderboardContractAddress, leaderboardAbi, provider);
+
+  try{
+    const [wallets,scores] = await leaderboard.getTopScores();
+    const tbody = document.getElementById("leaderBody");
+    tbody.innerHTML="";
+    for(let i=0;i<wallets.length;i++){
+      const tr=document.createElement("tr");
+      tr.innerHTML=`<td>${i+1}</td><td>${wallets[i]}</td><td>${scores[i]}</td>`;
+      tbody.appendChild(tr);
+    }
+  }catch(e){console.error(e);}
 }
-window.addEventListener("load", loadLeaderboard);
+
+loadLeaderboard();
+setInterval(loadLeaderboard,10000); // update tiap 10 detik
 </script>
 </body>
 </html>
