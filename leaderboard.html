@@ -1,66 +1,29 @@
-<!doctype html>
-<html lang="id">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Leaderboard</title>
-  <style>
-    body{margin:0;background:#0a0010;color:#fff;font-family:Arial;padding:16px}
-    h2{color:orange}
-    ol{padding-left:18px}
-    li{margin:8px 0}
-    button{padding:8px;border-radius:8px;border:none;background:linear-gradient(90deg,orange,purple);color:#fff}
-  </style>
+<meta charset="UTF-8">
+<title>Leaderboard</title>
 </head>
 <body>
-  <h2>Top 10 Leaderboard (Onchain)</h2>
-  <div id="status">Loading...</div>
-  <ol id="list"></ol>
-  <div style="margin-top:12px">
-    <button id="btn-refresh">Refresh</button>
-  </div>
-
-  <script>
-    function render(data, scores){
-      const ol = document.getElementById("list");
-      ol.innerHTML = "";
-      if (!data || data.length===0){ document.getElementById("status").innerText = "No players yet"; return; }
-      document.getElementById("status").innerText = "";
-      for (let i=0;i<data.length;i++){
-        const a = data[i];
-        const s = (scores && scores[i]) ? scores[i].toString() : "0";
-        const li = document.createElement("li");
-        li.innerText = `${i+1}. ${a} — ${s} pts`;
-        ol.appendChild(li);
-      }
-    }
-
-    // ask parent to fetch
-    function refresh(){
-      document.getElementById("status").innerText = "Fetching from chain...";
-      window.parent.postMessage({ type: "REQUEST_TOP10" }, "*");
-    }
-
-    // handle parent result
-    window.addEventListener("message", (ev)=>{
-      const d = ev.data || {};
-      if (!d.type) return;
-      if (d.type === "TOP10_RESULT"){
-        if (d.success){
-          render(d.players || [], d.scores || []);
-        } else {
-          document.getElementById("status").innerText = "Error: " + (d.message || "failed");
-        }
-      }
-      if (d.type === "REFRESH_TOP10"){
-        refresh();
-      }
-    });
-
-    document.getElementById("btn-refresh").onclick = refresh;
-
-    // initial
-    refresh();
-  </script>
+<h2>LEADERBOARD</h2>
+<ul id="leaderList"></ul>
+<script src="libs/ethers.min.js"></script>
+<script>
+const contractAddress="0xYourContractAddress";
+const abi=["function getLeaderboard() view returns(address[] memory,uint256[] memory)"];
+async function loadLeaderboard(){
+  if(!window.ethereum){ alert("No wallet provider found"); return; }
+  const provider=new ethers.BrowserProvider(window.ethereum);
+  const contract=new ethers.Contract(contractAddress, abi, provider);
+  const [addresses,scores]=await contract.getLeaderboard();
+  const ul=document.getElementById("leaderList"); ul.innerHTML="";
+  for(let i=0;i<addresses.length;i++){
+    const li=document.createElement("li");
+    li.textContent=addresses[i]+" - "+scores[i];
+    ul.appendChild(li);
+  }
+}
+window.addEventListener("load", loadLeaderboard);
+</script>
 </body>
 </html>
