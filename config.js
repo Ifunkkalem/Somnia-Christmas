@@ -1,26 +1,15 @@
-// config.js — production mainnet
-window.SOMNIA_RPC = "https://api.infra.mainnet.somnia.network";
-window.SOMNIA_CHAIN = {
-  chainId: "0x13a7", // 5031 mainnet
+window.SOMNIA = {
+  chainId: "0x13a7", // 5031
   chainName: "Somnia Mainnet",
-  nativeCurrency: { name: "Somnia Token", symbol: "SOMI", decimals: 18 },
-  rpcUrls: [window.SOMNIA_RPC],
-  blockExplorerUrls: ["https://explorer.somnia.network"] // jika ada
+  nativeCurrency: {
+    name: "SOMI",
+    symbol: "SOMI",
+    decimals: 18
+  },
+  rpcUrls: ["https://api.infra.mainnet.somnia.network"],
+  blockExplorerUrls: ["https://explorer.somnia.network"]
 };
 
-// Leaderboard contract (you deployed)
-window.CONTRACTS = {
-  LEADERBOARD: "0xD76b767102f2610b0C97FEE84873c1fAA4c7C365"
-};
+window.CONTRACT_ADDRESS = "0xD76b767102f2610b0C97FEE84873c1fAA4c7C365"; // ✅ BENAR
 
-// minimal ABI for PacmanLeaderboard
-window.ABI = {
-  LEADERBOARD: [
-    "function startGame() payable",
-    "function submitScore(uint256 score)",
-    "function getTop10() view returns (address[] memory topPlayers, uint256[] memory scores)",
-    "function startFeeWei() view returns (uint256)",
-    "event GameStarted(address indexed player, uint256 fee)",
-    "event ScoreSubmitted(address indexed player, uint256 score)"
-  ]
-};
+window.CONTRACT_ABI = [[{"inputs":[{"internalType":"address","name":"_treasury","type":"address"},{"internalType":"uint256","name":"_startFeeWei","type":"uint256"},{"internalType":"uint256","name":"_maxScorePerSubmit","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"player","type":"address"},{"indexed":false,"internalType":"uint256","name":"fee","type":"uint256"}],"name":"GameStarted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"player","type":"address"},{"indexed":false,"internalType":"uint256","name":"score","type":"uint256"}],"name":"ScoreSubmitted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Withdraw","type":"event"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"allPlayers","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getTop10","outputs":[{"internalType":"address[]","name":"topPlayers","type":"address[]"},{"internalType":"uint256[]","name":"scores","type":"uint256[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"maxScorePerSubmit","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"players","outputs":[{"internalType":"uint256","name":"totalScore","type":"uint256"},{"internalType":"uint256","name":"lastPlayed","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"startFeeWei","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"startGame","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"score","type":"uint256"}],"name":"submitScore","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}]];
