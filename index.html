@@ -1,232 +1,111 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>Somnia Christmas - Pacman Edition</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Somnia Halloween — Pacman (Mainnet)</title>
+  <link rel="stylesheet" href="Pacman/pacman.css" />
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Trebuchet MS', sans-serif;
-    }
-
-    body {
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      background: radial-gradient(circle at top, #0b3d2e, #020b06);
-      color: #fff;
-    }
-
-    /* ❄️ Snow Animation */
-    .snow {
-      position: absolute;
-      top: -10px;
-      width: 8px;
-      height: 8px;
-      background: white;
-      border-radius: 50%;
-      opacity: 0.8;
-      animation: snowFall linear infinite;
-    }
-
-    @keyframes snowFall {
-      from { transform: translateY(0); }
-      to { transform: translateY(120vh); }
-    }
-
-    /* 🎄 Center Screen */
-    .screen {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 10;
-      position: relative;
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 42px;
-      color: #00ffae;
-      text-shadow: 0 0 10px red, 0 0 20px green;
-      margin-bottom: 8px;
-    }
-
-    h2 {
-      font-size: 22px;
-      color: #ffffff;
-      margin-bottom: 30px;
-    }
-
-    .menu-box {
-      background: rgba(5, 30, 20, 0.85);
-      border: 2px solid #00ffae;
-      border-radius: 18px;
-      padding: 30px 40px;
-      box-shadow: 0 0 25px green;
-      min-width: 320px;
-    }
-
-    .menu-box input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      margin-bottom: 18px;
-      text-align: center;
-      font-size: 16px;
-      outline: none;
-    }
-
-    .menu-box button {
-      width: 100%;
-      padding: 14px;
-      margin: 8px 0;
-      font-size: 16px;
-      font-weight: bold;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      background: linear-gradient(90deg, #ff0000, #00ff7f);
-      color: white;
-      transition: 0.2s;
-    }
-
-    .menu-box button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 15px red;
-    }
-
-    /* 🔄 Hidden Screens */
-    .hidden {
-      display: none !important;
-    }
-
-    /* GAME & LEADERBOARD FRAME */
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: black;
-    }
-
-    /* 🔙 BACK BUTTON */
-    .back-btn {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      z-index: 9999;
-      padding: 10px 18px;
-      border-radius: 10px;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-      background: linear-gradient(90deg, red, green);
-      color: white;
-    }
+    /* simple menu styling (orange/purple) */
+    body{margin:0;font-family:Arial;background:radial-gradient(circle at top,#2b0033,#0a0010);color:#fff;height:100vh;overflow:hidden}
+    .center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(920px,95vw)}
+    .menu{background:rgba(20,0,30,0.85);border:2px solid orange;padding:20px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+    .menu h1{color:orange;margin-bottom:6px;text-align:center}
+    .menu p{color:#c77dff;text-align:center;margin-bottom:14px}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    button{flex:1;padding:12px;border-radius:8px;border:none;font-weight:700;cursor:pointer;background:linear-gradient(90deg,orange,purple);color:#fff}
+    .small{flex:0 0 160px}
+    #live-indicator{float:right;padding:6px 10px;border-radius:8px;background:#442; color:#fdd;}
+    #addr-display{font-size:13px;color:#ddd; margin-top:8px}
+    iframe{width:100%;height:64vh;border-radius:10px;border:0;background:#000}
+    .hidden{display:none}
   </style>
 </head>
 <body>
+  <div class="center">
+    <div class="menu" id="menuScreen">
+      <h1>WELCOME SOMNIA HALLOWEEN</h1>
+      <p>PAC-MAN EDITION — MAINNET</p>
 
-<!-- ❄️ SNOW EFFECT -->
-<script>
-  for (let i = 0; i < 35; i++) {
-    const snow = document.createElement("div");
-    snow.className = "snow";
-    snow.style.left = Math.random() * 100 + "vw";
-    snow.style.animationDuration = (Math.random() * 5 + 5) + "s";
-    snow.style.opacity = Math.random();
-    document.body.appendChild(snow);
-  }
-</script>
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+        <div style="flex:1">
+          <input id="displayNameInput" maxlength="12" placeholder="Display name (max 12)" style="width:100%;padding:10px;border-radius:8px;border:none;text-align:center"/>
+        </div>
+        <div>
+          <button id="btn-connect" class="small">Connect Wallet</button>
+        </div>
+      </div>
 
-<!-- 🎄 MAIN MENU -->
-<div id="menuScreen" class="screen">
-  <h1>☃️ SOMNIA CHRISTMAS CARNIVAL</h1>
-  <h2>PAC-MAN EDITION 🎄</h2>
+      <div id="addr-display">Not connected</div>
+      <div style="margin-top:12px" class="row">
+        <button onclick="openPlay()">PLAY</button>
+        <button onclick="openLeaderboard()">LEADERBOARD</button>
+        <button onclick="quitGame()">QUIT</button>
+      </div>
+    </div>
 
-  <div class="menu-box">
-    <input 
-      id="displayNameInput" 
-      type="text" 
-      maxlength="12" 
-      placeholder="Enter Display Name (Max 12)"
-    />
+    <div id="playScreen" class="hidden">
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button onclick="backToMenu()" style="flex:0 0 120px">Back</button>
+        <div style="flex:1"></div>
+        <div id="live-indicator" class="">OFFLINE</div>
+      </div>
+      <iframe id="pacman-iframe" src="Pacman/pacman.html"></iframe>
+    </div>
 
-    <button onclick="saveName()">SAVE DISPLAY NAME</button>
-    <button onclick="openPlay()">PLAY</button>
-    <button onclick="openLeaderboard()">LEADERBOARD</button>
-    <button onclick="quitGame()">QUIT</button>
+    <div id="leaderboardScreen" class="hidden">
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button onclick="backToMenu()" style="flex:0 0 120px">Back</button>
+        <div style="flex:1"></div>
+        <div id="live-indicator-2"></div>
+      </div>
+      <iframe id="leaderboard-iframe" src="leaderboard.html"></iframe>
+    </div>
   </div>
-</div>
 
-<!-- 🎮 PLAY SCREEN -->
-<div id="playScreen" class="screen hidden">
-  <button class="back-btn" onclick="goBack()">⬅ BACK</button>
-  <iframe id="gameFrame" src="pacman.html"></iframe>
-</div>
+  <script src="config.js"></script>
+  <script src="libs/ethers.min.js"></script>
+  <script src="web3.js"></script>
+  <script src="app.js"></script>
 
-<!-- 🏆 LEADERBOARD SCREEN -->
-<div id="leaderboardScreen" class="screen hidden">
-  <button class="back-btn" onclick="goBack()">⬅ BACK</button>
-  <iframe id="leaderFrame" src="leaderboard.html"></iframe>
-</div>
+  <script>
+    // simple menu functions
+    const nameInput = document.getElementById("displayNameInput");
+    const stored = localStorage.getItem("displayName");
+    if (stored) nameInput.value = stored;
 
-<script>
-  const nameInput = document.getElementById("displayNameInput");
-  const savedName = localStorage.getItem("displayName");
-
-  if (savedName) nameInput.value = savedName;
-
-  function saveName() {
-    let name = nameInput.value.trim();
-    if (name.length === 0) {
-      alert("Nama tidak boleh kosong!");
-      return;
+    function openPlay(){
+      const v = nameInput.value.trim();
+      if (!v) { alert("Isi display name dulu (max 12)."); return; }
+      if (v.length>12) { alert("Max 12 char"); return; }
+      localStorage.setItem("displayName", v);
+      document.getElementById("menuScreen").classList.add("hidden");
+      document.getElementById("playScreen").classList.remove("hidden");
     }
-    if (name.length > 12) {
-      alert("Max 12 karakter!");
-      return;
+    function openLeaderboard(){
+      document.getElementById("menuScreen").classList.add("hidden");
+      document.getElementById("leaderboardScreen").classList.remove("hidden");
+      // ask leaderboard iframe to refresh
+      document.getElementById("leaderboard-iframe").contentWindow && document.getElementById("leaderboard-iframe").contentWindow.postMessage({type:'REFRESH_TOP10'},"*");
     }
-    localStorage.setItem("displayName", name);
-    alert("Display Name disimpan!");
-  }
+    function backToMenu(){
+      document.getElementById("menuScreen").classList.remove("hidden");
+      document.getElementById("playScreen").classList.add("hidden");
+      document.getElementById("leaderboardScreen").classList.add("hidden");
+    }
+    function quitGame(){
+      window.open("about:blank","_self"); window.close();
+    }
 
-  function openPlay() {
-    document.getElementById("menuScreen").classList.add("hidden");
-    document.getElementById("leaderboardScreen").classList.add("hidden");
-    document.getElementById("playScreen").classList.remove("hidden");
-
-    // paksa reload game setiap klik play
-    document.getElementById("gameFrame").src = "pacman.html?" + Date.now();
-  }
-
-  function openLeaderboard() {
-    document.getElementById("menuScreen").classList.add("hidden");
-    document.getElementById("playScreen").classList.add("hidden");
-    document.getElementById("leaderboardScreen").classList.remove("hidden");
-
-    // reload leaderboard
-    document.getElementById("leaderFrame").src = "leaderboard.html?" + Date.now();
-  }
-
-  function goBack() {
-    document.getElementById("playScreen").classList.add("hidden");
-    document.getElementById("leaderboardScreen").classList.add("hidden");
-    document.getElementById("menuScreen").classList.remove("hidden");
-  }
-
-  function quitGame() {
-    window.open("about:blank", "_self");
-    window.close();
-  }
-</script>
-
+    // show address on connect (web3.js will call afterWalletConnected)
+    window.afterWalletConnected = function(addr){
+      document.getElementById("addr-display").innerText = addr || "Connected";
+      document.getElementById("live-indicator").innerText = "ONLINE";
+      document.getElementById("live-indicator").style.background = "#144";
+      // propagate to iframe
+      const pac = document.getElementById("pacman-iframe");
+      if (pac && pac.contentWindow) pac.contentWindow.postMessage({type:'WALLET_CONNECTED', address:addr, displayName: localStorage.getItem("displayName") || "" }, "*");
+    };
+  </script>
 </body>
 </html>
