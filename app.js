@@ -7,12 +7,11 @@ const SOMNIA_CHAIN = {
 };
 
 const CONTRACT_LEADERBOARD = "0xD76b767102f2610b0C97FEE84873c1fAA4c7C365";
-const START_FEE = "0.01";
 
 // ================= STATE =================
 let provider, signer, userAddress;
 
-// ================= UI ELEMENTS =================
+// ================= UI =================
 const btnConnect = document.getElementById("btnConnect");
 const addrDisplay = document.getElementById("addrDisplay");
 const balanceSomi = document.getElementById("balanceSomi");
@@ -38,10 +37,15 @@ function shortAddr(a){
   return a.slice(0,6)+"..."+a.slice(-4);
 }
 
+async function refreshBalance(){
+  const bal = await provider.getBalance(userAddress);
+  balanceSomi.innerText = Number(ethers.utils.formatEther(bal)).toFixed(4);
+}
+
 // ================= WALLET CONNECT =================
 btnConnect.onclick = async ()=>{
   if (!window.ethereum) {
-    alert("Buka pakai MetaMask Browser / Web3 Browser");
+    alert("Gunakan browser Web3 / MetaMask");
     return;
   }
 
@@ -60,16 +64,12 @@ btnConnect.onclick = async ()=>{
     signer = provider.getSigner();
     userAddress = await signer.getAddress();
 
-    // ✅ UPDATE STATUS ATAS
     addrDisplay.innerText = shortAddr(userAddress);
     btnConnect.innerText = "Connected";
     btnConnect.disabled = true;
 
-    // ✅ UPDATE SALDO
-    const bal = await provider.getBalance(userAddress);
-    balanceSomi.innerText = Number(ethers.utils.formatEther(bal)).toFixed(4);
+    await refreshBalance();
 
-    // ✅ LOAD NAME
     const saved = localStorage.getItem("name_" + userAddress);
     if (saved) nameInput.value = saved;
 
@@ -83,47 +83,21 @@ btnConnect.onclick = async ()=>{
 
 // ================= SAVE NAME =================
 btnSaveName.onclick = ()=>{
-  if (!userAddress) {
-    alert("Connect wallet dulu");
-    return;
-  }
+  if (!userAddress) return alert("Connect wallet dulu");
 
   const name = nameInput.value.trim();
-  if (!name || name.length > 12) {
-    alert("Nama 1–12 karakter");
-    return;
-  }
+  if (!name || name.length > 12) return alert("Nama 1–12 karakter");
 
   localStorage.setItem("name_" + userAddress, name);
   alert("Nama disimpan");
 };
 
-// ================= PLAY GAME =================
+// ================= PLAY GAME (TX REAL) =================
 btnPlay.onclick = async () => {
-  try {
-    if (!window.DreamWeb3) {
-      alert("Web3 belum siap");
-      return;
-    }
-
-    document.getElementById("activityLog").innerText = "Requesting TX...";
-
-    const txhash = await DreamWeb3.startGame();
-
-    if (txhash) {
-      document.getElementById("activityLog").innerText = "✅ Game Started";
-
-      // ✅ BUKA GAME SETELAH TX SUKSES
-      document.getElementById("menuScreen").style.display = "none";
-      document.getElementById("leaderboardScreen").style.display = "none";
-      document.getElementById("playScreen").style.display = "flex";
-    }
-
-  } catch (e) {
-    console.error(e);
-    alert("Gagal memulai game");
+  if (!signer) {
+    alert("Connect wallet dulu");
+    return;
   }
-
 
   try {
     btnPlay.disabled = true;
@@ -135,51 +109,35 @@ btnPlay.onclick = async () => {
       signer
     );
 
-    // ✅ AMBIL STARTFEE LANGSUNG DARI CHAIN
+    // ✅ Ambil start fee langsung dari chain
     const startFee = await contract.startFeeWei();
-    console.log("START FEE ONCHAIN:", startFee.toString());
+    console.log("START FEE:", ethers.utils.formatEther(startFee));
 
     const bal = await provider.getBalance(userAddress);
     if (bal.lt(startFee)) {
-      alert("Saldo SOMI tidak cukup.");
-      btnPlay.disabled = false;
-      btnPlay.innerText = "PLAY (0.01 SOMI)";
+      alert("Saldo SOMI tidak cukup");
       return;
     }
 
-    // ✅ HARD GAS BYPASS ESTIMATE
+    // ✅ TX START GAME
     const tx = await contract.startGame({
       value: startFee,
       gasLimit: 350000
     });
 
-    logAct("TX sent: " + tx.hash);
-
+    log("TX sent: " + tx.hash);
     await tx.wait(1);
 
-    logAct("Game started!");
+    log("✅ Game Started");
     await refreshBalance();
-    openPlayScreen();
+    openPlay();
 
   } catch (err) {
     console.error("START GAME ERROR:", err);
-    alert("TX gagal: kemungkinan fee tidak cocok / cooldown aktif.");
+    alert("TX gagal atau dibatalkan");
   } finally {
     btnPlay.disabled = false;
     btnPlay.innerText = "PLAY (0.01 SOMI)";
-  }
-};
-
-    // ✅ UPDATE SALDO SETELAH TX
-    const bal = await provider.getBalance(userAddress);
-    balanceSomi.innerText = Number(ethers.utils.formatEther(bal)).toFixed(4);
-
-    openPlay();
-    log("TX Success, game started");
-
-  } catch(e){
-    console.error(e);
-    alert("TX dibatalkan / gagal");
   }
 };
 
@@ -190,7 +148,7 @@ function openPlay(){
   playPlayerName.innerText = nameInput.value || "Player";
   playAddr.innerText = shortAddr(userAddress);
 
-  // ✅ RELOAD IFRAME AGAR TIDAK HITAM
+  // ✅ paksa reload iframe agar tidak hitam
   gameFrame.src = "Pacman/pacman_hybrid.html?ts=" + Date.now();
 }
 
