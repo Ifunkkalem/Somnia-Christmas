@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pac-Man Christmas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+  body{margin:0;padding:0;background:#000;color:white;overflow:hidden;font-family:'Trebuchet MS',sans-serif;}
+  canvas{display:block;margin:0 auto;background:#000000;}
+  #payNotice{position:absolute;top:10px;left:50%;transform:translateX(-50%);
+    color:#00ffae;font-size:18px;background:rgba(0,0,0,0.7);padding:10px;border-radius:10px;display:none;}
+</style>
+</head>
+<body>
+<div id="payNotice">Pay 0.01 $SOMI to play!</div>
+<canvas id="gameCanvas" width="600" height="600"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let gameStarted = false;
+let walletAddress = window.walletAddress || null;
+let provider, signer;
+let somiContractAddress = "0xYourSomiTokenAddressHere"; // ganti sesuai contract
+let somiAbi = ["function transfer(address to,uint amount) returns(bool)","function balanceOf(address owner) view returns(uint256)","function decimals() view returns(uint8)"];
+let contract;
+let player = {x:50,y:50,size:20,dirX:0,dirY:0};
+let dots = [];
+let ghosts = [];
+let score = 0;
+
+// ==================== INIT ====================
+function initGame(){
+  // Generate dots
+  for(let i=0;i<20;i++){
+    for(let j=0;j<20;j++){
+      dots.push({x:i*30+10, y:j*30+10, size:6, eaten:false});
+    }
+  }
+
+  // Simple ghost
+  ghosts.push({x:300,y:300,size:20,dirX:1,dirY:0});
+  ghosts.push({x:500,y:500,size:20,dirX:-1,dirY:0});
+
+  draw();
+}
+
+// ==================== DRAW ====================
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // draw player
+  ctx.fillStyle="yellow";
+  ctx.fillRect(player.x,player.y,player.size,player.size);
+
+  // draw dots
+  ctx.fillStyle="white";
+  dots.forEach(d=>{
+    if(!d.eaten) ctx.fillRect(d.x,d.y,d.size,d.size);
+  });
+
+  // draw ghosts
+  ctx.fillStyle="red";
+  ghosts.forEach(g=>{
+    ctx.fillRect(g.x,g.y,g.size,g.size);
+  });
+}
+
+// ==================== GAME LOOP ====================
+function gameLoop(){
+  if(!gameStarted) return;
+
+  // move player
+  player.x += player.dirX*5;
+  player.y += player.dirY*5;
+
+  // boundary
+  if(player.x<0) player.x=0;
+  if(player.y<0) player.y=0;
+  if(player.x>canvas.width-player.size) player.x=canvas.width-player.size;
+  if(player.y>canvas.height-player.size) player.y=canvas.height-player.size;
+
+  // eat dots
+  dots.forEach(d=>{
+    if(!d.eaten && Math.abs(player.x-d.x)<player.size && Math.abs(player.y-d.y)<player.size){
+      d.eaten=true;
+      score++;
+    }
+  });
+
+  // move ghosts simple
+  ghosts.forEach(g=>{
+    g.x += g.dirX*2;
+    g.y += g.dirY*2;
+    if(g.x<0||g.x>canvas.width-g.size) g.dirX*=-1;
+    if(g.y<0||g.y>canvas.height-g.size) g.dirY*=-1;
+  });
+
+  // collision ghost
+  for(let g of ghosts){
+    if(Math.abs(player.x-g.x)<player.size && Math.abs(player.y-g.y)<player.size){
+      gameOver();
+      return;
+    }
+  }
+
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+// ==================== PAY TO PLAY ====================
+async function payToPlay(){
+  if(!walletAddress){
+    alert("Connect wallet first!");
+    return;
+  }
+
+  provider = new ethers.providers.Web3Provider(window.ethereum);
+  signer = provider.getSigner();
+  contract = new ethers.Contract(somiContractAddress,somiAbi,signer);
+
+  const decimals = await contract.decimals();
+  const amount = ethers.utils.parseUnits("0.01",decimals);
+
+  try{
+    const tx = await contract.transfer(walletAddress, amount); // bisa ganti ke game owner
+    await tx.wait();
+    gameStarted = true;
+    document.getElementById("payNotice").style.display="none";
+    alert("Payment successful! Game started.");
+    gameLoop();
+  }catch(e){
+    console.error(e);
+    alert("Payment failed!");
+  }
+}
+
+// ==================== GAME OVER ====================
+async function gameOver(){
+  gameStarted=false;
+  alert("Game Over! Score: "+score);
+
+  if(!walletAddress) return;
+  try{
+    // Submit score ke leaderboard contract (simplified)
+    console.log("Submit score", walletAddress, score);
+  }catch(e){
+    console.error(e);
+  }
+}
+
+// ==================== CONTROLS ====================
+window.addEventListener("keydown",async(e)=>{
+  if(!gameStarted){
+    document.getElementById("payNotice").style.display="block";
+    return;
+  }
+  switch(e.key){
+    case "ArrowUp": player.dirX=0; player.dirY=-1; break;
+    case "ArrowDown": player.dirX=0; player.dirY=1; break;
+    case "ArrowLeft": player.dirX=-1; player.dirY=0; break;
+    case "ArrowRight": player.dirX=1; player.dirY=0; break;
+  }
+});
+
+initGame();
+</script>
+</body>
+</html>
