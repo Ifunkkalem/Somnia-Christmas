@@ -100,10 +100,30 @@ btnSaveName.onclick = ()=>{
 
 // ================= PLAY GAME =================
 btnPlay.onclick = async () => {
-  if (!provider || !signer || !userAddress) {
-    alert("Connect wallet dulu.");
-    return;
+  try {
+    if (!window.DreamWeb3) {
+      alert("Web3 belum siap");
+      return;
+    }
+
+    document.getElementById("activityLog").innerText = "Requesting TX...";
+
+    const txhash = await DreamWeb3.startGame();
+
+    if (txhash) {
+      document.getElementById("activityLog").innerText = "✅ Game Started";
+
+      // ✅ BUKA GAME SETELAH TX SUKSES
+      document.getElementById("menuScreen").style.display = "none";
+      document.getElementById("leaderboardScreen").style.display = "none";
+      document.getElementById("playScreen").style.display = "flex";
+    }
+
+  } catch (e) {
+    console.error(e);
+    alert("Gagal memulai game");
   }
+
 
   try {
     btnPlay.disabled = true;
