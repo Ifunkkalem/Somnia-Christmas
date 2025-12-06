@@ -106,9 +106,7 @@ for(let i=0;i<50;i++){
 }
 </script>
 
-<!-- Ethers.js -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-
 <script>
 let walletAddress = localStorage.getItem("walletAddress") || null;
 let walletBalance = 0;
@@ -129,8 +127,7 @@ async function connectWallet(){
       localStorage.setItem("walletAddress", walletAddress);
       window.walletAddress = walletAddress;
 
-      // Ambil balance $SOMI dari contract ERC-20
-      const somiContractAddress = "0xYourSomiTokenAddressHere";
+      const somiContractAddress = "0xYourSomiTokenAddressHere"; // replace
       const somiAbi = ["function balanceOf(address owner) view returns (uint256)","function decimals() view returns (uint8)"];
       const contract = new ethers.Contract(somiContractAddress, somiAbi, provider);
       const decimals = await contract.decimals();
@@ -163,6 +160,5 @@ function showLeaderboard(){
   leaderboardFrame.src = "leaderboard.html?" + Date.now();
 }
 </script>
-
 </body>
 </html>
