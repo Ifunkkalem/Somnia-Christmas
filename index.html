@@ -1,210 +1,111 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Somnia Christmas — Pacman Edition</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-
+  <meta charset="UTF-8" />
+  <title>Somnia Christmas - Pacman Edition</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Trebuchet MS', sans-serif; }
     body {
-      margin: 0;
-      font-family: Inter, Arial, Helvetica, sans-serif;
-      background: radial-gradient(circle at top, #0b3b5a, #0a0812);
-      color: #fff;
-      height: 100vh;
-      overflow: hidden;
+      width:100vw; height:100vh; overflow:hidden; background: radial-gradient(circle at top, #0b3d2e, #020b06);
+      color:#fff; position:relative;
     }
 
-    .screen {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    /* ❄️ Snow */
+    .snow { position:absolute; top:-10px; width:8px; height:8px; background:white; border-radius:50%; opacity:0.8; animation:snowFall linear infinite; }
+    @keyframes snowFall { from {transform:translateY(0);} to {transform:translateY(120vh);} }
 
-    .menu {
-      background: rgba(255, 255, 255, 0.05);
-      border: 2px solid #ffd27f;
-      padding: 28px;
-      border-radius: 14px;
-      min-width: 320px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-    }
+    /* ✨ Stars */
+    .star { position:absolute; width:3px; height:3px; background:yellow; border-radius:50%; opacity:0.7; animation:twinkle 2s infinite alternate; }
+    @keyframes twinkle { from{opacity:0.3;} to{opacity:1;} }
 
-    h1 {
-      color: #fff;
-      margin-bottom: 6px;
-      text-shadow: 0 0 12px #ffd27f;
-    }
+    /* 🎄 Christmas Lights */
+    .lights span { display:inline-block; width:15px; height:15px; margin:0 4px; border-radius:50%; background-color:red; animation:blink 1.5s infinite; }
+    .lights span:nth-child(2n){ background-color:yellow; animation-delay:0.3s; }
+    .lights span:nth-child(3n){ background-color:green; animation-delay:0.6s; }
+    @keyframes blink {0%,50%,100%{opacity:1;}25%,75%{opacity:0.2;}}
 
-    h2 {
-      color: #e5c9ff;
-      margin-bottom: 14px;
-    }
+    .screen { width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:10; position:relative; text-align:center; }
+    h1 { font-size:42px; color:#00ffae; text-shadow:0 0 10px red, 0 0 20px green; margin-bottom:8px; }
+    h2 { font-size:22px; color:#fff; margin-bottom:30px; }
 
-    .menu input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      margin-bottom: 12px;
-      text-align: center;
-      outline: none;
-    }
+    .menu-box { background: rgba(5,30,20,0.85); border:2px solid #00ffae; border-radius:18px; padding:30px 40px; box-shadow:0 0 25px green; min-width:320px; }
+    .menu-box input { width:100%; padding:12px; border-radius:10px; border:none; margin-bottom:18px; text-align:center; font-size:16px; outline:none; }
+    .menu-box button { width:100%; padding:14px; margin:8px 0; font-size:16px; font-weight:bold; border:none; border-radius:12px; cursor:pointer; background:linear-gradient(90deg, #ff0000, #00ff7f); color:white; transition:0.2s; }
+    .menu-box button:hover { transform:scale(1.05); box-shadow:0 0 15px red; }
 
-    .menu button {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      font-weight: 700;
-      background: linear-gradient(90deg, #ffd27f, #c77dff);
-      color: #111;
-    }
+    .hidden { display:none !important; }
 
-    .small {
-      padding: 8px;
-      font-size: 14px;
-    }
+    iframe { width:100%; height:100%; border:none; background:black; border:5px solid #00ffae; border-radius:15px; box-shadow:0 0 25px red; }
 
-    .topbar {
-      position: fixed;
-      left: 16px;
-      top: 12px;
-      color: #fff;
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      z-index: 99;
-    }
+    .back-btn { position:absolute; top:15px; left:15px; z-index:9999; padding:10px 18px; border-radius:10px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(90deg, red, green); color:white; }
 
-    .badge {
-      background: #ffffff22;
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-weight: 700;
-    }
-
-    #addrDisplay {
-      font-size: 13px;
-      opacity: 0.9;
-    }
-
-    #playContainer {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .controlsRow {
-      display: flex;
-      gap: 8px;
-      padding: 10px;
-      background: linear-gradient(90deg, #121212, #0b1b2a);
-      align-items: center;
-    }
-
-    #iframeWrap {
-      flex: 1;
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #gameFrame {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: #000;
-    }
-
-    .muted {
-      opacity: 0.85;
-      color: #ddd;
-      font-size: 13px;
-    }
-
-    .activity {
-      position: fixed;
-      right: 12px;
-      top: 12px;
-      background: #0008;
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-size: 13px;
-      z-index: 99;
-    }
+    /* ✨ Button Sound Active */
+    button:active { transform:scale(0.95); }
   </style>
 </head>
 <body>
 
-  <!-- ✅ TOP BAR -->
-  <div class="topbar">
-    <div class="badge">Somnia Mainnet</div>
-    <div id="addrDisplay">Not connected</div>
-    <button id="btnConnect">Connect Wallet</button>
+<!-- ❄️ Snow + Stars -->
+<script>
+  for(let i=0;i<40;i++){
+    const snow=document.createElement("div"); snow.className="snow";
+    snow.style.left=Math.random()*100+"vw"; snow.style.animationDuration=(Math.random()*5+5)+"s"; snow.style.opacity=Math.random();
+    document.body.appendChild(snow);
+  }
+  for(let i=0;i<60;i++){
+    const star=document.createElement("div"); star.className="star";
+    star.style.left=Math.random()*100+"vw"; star.style.top=Math.random()*80+"vh";
+    star.style.width=star.style.height=(Math.random()*3+1)+"px"; star.style.animationDuration=(1+Math.random()*2)+"s";
+    document.body.appendChild(star);
+  }
+</script>
+
+<!-- 🎄 MAIN MENU -->
+<div id="menuScreen" class="screen">
+  <div class="lights"><span></span><span></span><span></span><span></span><span></span></div>
+  <h1>☃️ SOMNIA CHRISTMAS CARNIVAL</h1>
+  <h2>PAC-MAN EDITION 🎄</h2>
+
+  <div class="menu-box">
+    <input id="displayNameInput" type="text" maxlength="12" placeholder="Enter Display Name (Max 12)" />
+    <button onclick="saveName(); playSound()">SAVE DISPLAY NAME</button>
+    <button onclick="openPlay(); playSound()">PLAY</button>
+    <button onclick="openLeaderboard(); playSound()">LEADERBOARD</button>
+    <button onclick="quitGame(); playSound()">QUIT</button>
   </div>
+</div>
 
-  <!-- ✅ MAIN MENU -->
-  <div id="menuScreen" class="screen">
-    <div class="menu">
-      <h1>WELCOME SOMNIA</h1>
-      <h2>PACMAN — Christmas Edition</h2>
+<!-- 🎮 PLAY SCREEN -->
+<div id="playScreen" class="screen hidden">
+  <button class="back-btn" onclick="goBack(); playSound()">⬅ BACK</button>
+  <iframe id="gameFrame" src="pacman.html"></iframe>
+</div>
 
-      <input id="displayNameInput" maxlength="12" placeholder="Display name (max 12)" />
+<!-- 🏆 LEADERBOARD SCREEN -->
+<div id="leaderboardScreen" class="screen hidden">
+  <button class="back-btn" onclick="goBack(); playSound()">⬅ BACK</button>
+  <iframe id="leaderFrame" src="leaderboard.html"></iframe>
+</div>
 
-      <button id="btnSaveName" class="small">SAVE DISPLAY NAME</button>
-      <button id="btnPlay" class="small">PLAY (0.01 SOMI)</button>
-      <button id="btnLeaderboard" class="small">LEADERBOARD</button>
-      <button id="btnQuit" class="small">QUIT</button>
+<script>
+  // Sound effect
+  const clickSound=new Audio("click-jingle.mp3");
+  function playSound(){ clickSound.currentTime=0; clickSound.play(); }
 
-      <div style="margin-top:12px;text-align:left;color:#eee;font-size:13px">
-        <div>Balance: <span id="balanceSomi">-</span> SOMI</div>
-        <div style="margin-top:6px" class="muted">Note: Play requires 0.01 SOMI on-chain</div>
-      </div>
-    </div>
-  </div>
+  const nameInput=document.getElementById("displayNameInput");
+  const savedName=localStorage.getItem("displayName");
+  if(savedName) nameInput.value=savedName;
 
-  <!-- ✅ PLAY SCREEN -->
-  <div id="playScreen" class="screen" style="display:none;flex-direction:column">
-    <div class="controlsRow">
-      <button id="btnBackFromPlay" class="small">← BACK</button>
-      <div style="flex:1"></div>
-      <div id="playPlayerName" class="muted"></div>
-      <div style="width:12px"></div>
-      <div id="playAddr" class="muted"></div>
-    </div>
+  function saveName(){ let name=nameInput.value.trim(); if(name.length===0){alert("Nama tidak boleh kosong!");return;} if(name.length>12){alert("Max 12 karakter!");return;} localStorage.setItem("displayName",name); alert("Display Name disimpan!"); }
+  function openPlay(){ document.getElementById("menuScreen").classList.add("hidden"); document.getElementById("leaderboardScreen").classList.add("hidden"); document.getElementById("playScreen").classList.remove("hidden"); document.getElementById("gameFrame").src="pacman.html?"+Date.now(); }
+  function openLeaderboard(){ document.getElementById("menuScreen").classList.add("hidden"); document.getElementById("playScreen").classList.add("hidden"); document.getElementById("leaderboardScreen").classList.remove("hidden"); document.getElementById("leaderFrame").src="leaderboard.html?"+Date.now(); }
+  function goBack(){ document.getElementById("playScreen").classList.add("hidden"); document.getElementById("leaderboardScreen").classList.add("hidden"); document.getElementById("menuScreen").classList.remove("hidden"); }
+  function quitGame(){ window.open("about:blank","_self"); window.close(); }
+</script>
 
-    <div id="iframeWrap">
-      <iframe id="gameFrame" src="Pacman/pacman_hybrid.html"></iframe>
-    </div>
-  </div>
-
-  <!-- ✅ LEADERBOARD SCREEN -->
-  <div id="leaderboardScreen" class="screen" style="display:none;flex-direction:column;align-items:center">
-    <div style="width:720px;max-width:95%;background:rgba(255,255,255,0.05);padding:18px;border-radius:12px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <button id="btnBackFromLb" class="small">← BACK</button>
-        <h3 style="margin:0">Leaderboard (Top 10)</h3>
-      </div>
-      <ol id="leaderboardList"></ol>
-    </div>
-  </div>
-
-  <!-- ✅ ACTIVITY LOG -->
-  <div class="activity" id="activityLog">Ready</div>
-
-  <script src="libs/ethers.min.js"></script>
-  <script src="config.js"></script>
-  <script src="web3.js"></script>
-  <script src="ui-check-player.js"></script>
-  <script src="app.js"></script>
+<!-- 🎶 Optional Music -->
+<!-- <audio autoplay loop src="xmas-music.mp3"></audio> -->
 
 </body>
 </html>
