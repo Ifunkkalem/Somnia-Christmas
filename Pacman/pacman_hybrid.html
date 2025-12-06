@@ -1,149 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Somnia Pacman</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8">
+  <title>Pacman Christmas</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0; overflow: hidden; background: #000; height: 100%; width: 100%;
+      font-family: Arial, sans-serif;
+    }
 
-<style>
-  body {
-    margin: 0;
-    padding: 0;
-    background: black;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
-  }
+    /* 🎄 Border lampu Natal */
+    #gameContainer {
+      position: relative;
+      width: 100%; height: 100%;
+      border: 8px solid red;
+      border-radius: 15px;
+      box-shadow: 0 0 30px green;
+      overflow: hidden;
+      animation: borderBlink 2s infinite;
+    }
 
-  #gameContainer {
-    position: relative;
-    width: 320px;
-    height: 420px;
-    border: 2px solid #00ffcc;
-    background: #000;
-  }
+    @keyframes borderBlink {
+      0% { box-shadow: 0 0 30px red; border-color: red; }
+      50% { box-shadow: 0 0 30px yellow; border-color: yellow; }
+      100% { box-shadow: 0 0 30px green; border-color: green; }
+    }
 
-  canvas {
-    display: block;
-    background: #000;
-  }
+    /* ❄️ Snow inside game */
+    .snow {
+      position: absolute;
+      top: -10px;
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: snowFall linear infinite;
+      z-index: 999;
+    }
 
-  #scoreBox {
-    position: absolute;
-    top: 5px;
-    left: 5px;
-    font-size: 14px;
-    color: #00ffcc;
-    z-index: 10;
-  }
+    @keyframes snowFall { from { transform: translateY(0); } to { transform: translateY(120vh); } }
 
-  /* MOBILE CONTROLS */
-  #mobileControls {
-    position: absolute;
-    bottom: 5px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: grid;
-    grid-template-columns: 60px 60px 60px;
-    grid-template-rows: 60px 60px 60px;
-    gap: 6px;
-    z-index: 20;
-  }
+    /* 🎮 Game canvas */
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: #111;
+      border-radius: 10px;
+    }
 
-  #mobileControls button {
-    font-size: 22px;
-    border-radius: 10px;
-    border: none;
-    background: #00ffcc;
-    color: black;
-    font-weight: bold;
-  }
+    /* Start / pause button */
+    #startBtn {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(90deg, red, green);
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 10px yellow;
+      z-index: 1000;
+    }
 
-</style>
+    #startBtn:hover { transform: translateX(-50%) scale(1.05); box-shadow: 0 0 20px red; }
+  </style>
 </head>
-
 <body>
 
 <div id="gameContainer">
-  <div id="scoreBox">Score: <span id="score">0</span></div>
-  <canvas id="game" width="320" height="420"></canvas>
-
-  <!-- MOBILE BUTTONS -->
-  <div id="mobileControls">
-    <div></div>
-    <button onclick="setDir('up')">⬆️</button>
-    <div></div>
-
-    <button onclick="setDir('left')">⬅️</button>
-    <button onclick="setDir('down')">⬇️</button>
-    <button onclick="setDir('right')">➡️</button>
-  </div>
-
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <button id="startBtn">START GAME 🎅</button>
 </div>
 
+<!-- ❄️ Snow Effect -->
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-const scoreEl = document.getElementById("score");
-
-let x = 160;
-let y = 200;
-let size = 10;
-let speed = 2;
-let dir = "right";
-let score = 0;
-
-// CONTROL FROM MOBILE
-function setDir(d){
-  dir = d;
-}
-
-// CONTROL FROM KEYBOARD
-window.addEventListener("keydown", e => {
-  if(e.key === "ArrowUp") dir = "up";
-  if(e.key === "ArrowDown") dir = "down";
-  if(e.key === "ArrowLeft") dir = "left";
-  if(e.key === "ArrowRight") dir = "right";
-});
-
-function drawPacman(){
-  ctx.beginPath();
-  ctx.arc(x, y, size, 0.25 * Math.PI, 1.75 * Math.PI);
-  ctx.lineTo(x, y);
-  ctx.fillStyle = "yellow";
-  ctx.fill();
-}
-
-function move(){
-  if(dir === "up") y -= speed;
-  if(dir === "down") y += speed;
-  if(dir === "left") x -= speed;
-  if(dir === "right") x += speed;
-
-  // WALL LIMIT
-  if(x < 10) x = 10;
-  if(x > canvas.width - 10) x = canvas.width - 10;
-  if(y < 20) y = 20;
-  if(y > canvas.height - 10) y = canvas.height - 10;
-}
-
-function loop(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  move();
-  drawPacman();
-
-  score += 1;
-  scoreEl.innerText = score;
-
-  requestAnimationFrame(loop);
-}
-
-loop();
+  for (let i = 0; i < 50; i++) {
+    const snow = document.createElement("div");
+    snow.className = "snow";
+    snow.style.left = Math.random() * 100 + "vw";
+    snow.style.animationDuration = (Math.random() * 5 + 5) + "s";
+    snow.style.opacity = Math.random();
+    document.body.appendChild(snow);
+  }
 </script>
+
+<!-- 🎮 Basic Pacman Setup (placeholder) -->
+<script>
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+
+  // Dummy Pacman drawing
+  function drawPacman() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "yellow";
+    ctx.beginPath();
+    ctx.arc(400, 300, 40, 0.25 * Math.PI, 1.75 * Math.PI);
+    ctx.lineTo(400, 300);
+    ctx.fill();
+  }
+
+  // Start / pause game
+  const startBtn = document.getElementById("startBtn");
+  let gameInterval;
+  startBtn.addEventListener("click", () => {
+    if (!gameInterval) {
+      gameInterval = setInterval(drawPacman, 1000/30); // 30 FPS
+      startBtn.innerText = "PAUSE GAME 🎄";
+    } else {
+      clearInterval(gameInterval);
+      gameInterval = null;
+      startBtn.innerText = "RESUME GAME 🎄";
+    }
+  });
+</script>
+
+<!-- 🎶 Optional Christmas Music -->
+<!-- <audio autoplay loop src="xmas-music.mp3"></audio> -->
 
 </body>
 </html>
