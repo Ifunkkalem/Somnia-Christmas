@@ -4,29 +4,31 @@
 <meta charset="UTF-8">
 <title>Pacman Christmas</title>
 <style>
-body, html { margin:0; padding:0; background:#020b06; display:flex; justify-content:center; align-items:center; height:100vh; }
-#gameContainer { position:relative; width:800px; height:600px; border:8px solid red; border-radius:15px; box-shadow:0 0 30px green; background:#111; overflow:hidden; }
-canvas { display:block; margin:0 auto; background:#111; }
+html, body { margin:0; padding:0; width:100%; height:100%; display:flex; justify-content:center; align-items:center; background:#020b06; }
+#gameContainer { position:relative; width:800px; height:600px; border:8px solid red; border-radius:15px; box-shadow:0 0 30px green; background:#111; }
+canvas { display:block; width:100%; height:100%; background:#333; }
 #finishBtn { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); padding:10px 20px; font-size:16px; font-weight:bold; border:none; border-radius:10px; background:linear-gradient(90deg,red,green); color:white; cursor:pointer; z-index:1000; }
 </style>
 </head>
 <body>
+
 <div id="gameContainer">
-<canvas id="gameCanvas" width="800" height="600"></canvas>
-<button id="finishBtn">FINISH GAME 🎄</button>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <button id="finishBtn">FINISH GAME 🎄</button>
 </div>
 
-<script src="../libs/ethers.min.js"></script>
+<!-- Ethers.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
 <script>
-// ====== GAME LOGIC ======
+// ====== GAME VARIABLES ======
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-
 let score = 0;
 let pacman = { x:1, y:1, dirX:0, dirY:0 };
 
 // simple map
-let map = [
+const map = [
   "################",
   "#..............#",
   "#.####.####.#..#",
@@ -36,7 +38,7 @@ let map = [
   "################"
 ];
 
-// dots array
+// dots
 let dots = [];
 for(let y=0;y<map.length;y++){
   for(let x=0;x<map[y].length;x++){
@@ -44,7 +46,7 @@ for(let y=0;y<map.length;y++){
   }
 }
 
-// ====== DRAW ======
+// ====== DRAW FUNCTIONS ======
 function drawMaze(){
   for(let y=0;y<map.length;y++){
     for(let x=0;x<map[y].length;x++){
@@ -84,6 +86,7 @@ function updatePacman(){
   });
 }
 
+// ====== CONTROLS ======
 document.addEventListener("keydown", e=>{
   if(e.key==="ArrowUp"){ pacman.dirX=0; pacman.dirY=-1; }
   if(e.key==="ArrowDown"){ pacman.dirX=0; pacman.dirY=1; }
@@ -101,7 +104,7 @@ let interval = setInterval(()=>{
   drawScore();
 },100);
 
-// ====== SUBMIT SCORE ======
+// ====== SMART CONTRACT SUBMIT ======
 const contractAddress = "0xYourContractAddressHere"; // ganti sesuai contract
 const abi = ["function submitScore(address player,uint256 score) external"];
 
