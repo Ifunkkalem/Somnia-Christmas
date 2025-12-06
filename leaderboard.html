@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Somnia Pacman Leaderboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: radial-gradient(circle at top, #0b3d2e, #020b06);
+      color: white;
+      font-family: Trebuchet MS, sans-serif;
+    }
+
+    /* ❄️ Snow */
+    .snow {
+      position: absolute;
+      top: -10px;
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: fall linear infinite;
+      z-index: 999;
+    }
+
+    @keyframes fall {
+      to { transform: translateY(120vh); }
+    }
+
+    #board {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 80%;
+      max-width: 500px;
+      background: rgba(0,0,0,0.7);
+      box-shadow: 0 0 20px green;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #00ffae;
+      text-align: center;
+    }
+
+    th {
+      background: green;
+    }
+  </style>
+</head>
+<body>
+
+<script>
+  for (let i = 0; i < 40; i++) {
+    const snow = document.createElement("div");
+    snow.className = "snow";
+    snow.style.left = Math.random() * 100 + "vw";
+    snow.style.animationDuration = (Math.random() * 5 + 5) + "s";
+    document.body.appendChild(snow);
+  }
+</script>
+
+<div id="board">
+  <h2>🏆 TOP 10 PACMAN SOMNIA</h2>
+
+  <table>
+    <tr>
+      <th>Rank</th>
+      <th>Player</th>
+      <th>Score</th>
+    </tr>
+
+    <tr><td>1</td><td>Loading...</td><td>--</td></tr>
+    <tr><td>2</td><td>Loading...</td><td>--</td></tr>
+    <tr><td>3</td><td>Loading...</td><td>--</td></tr>
+  </table>
+</div>
+
+<script>
+  // nanti di sini kita sambungkan ke getTop10() onchain
+  console.log("Leaderboard ready for onchain sync");
+</script>
+
+</body>
+</html>
